@@ -203,45 +203,110 @@
                     // Any initialization code
                 },
 
+                // sendMessage() {
+                //     if (!this.input.trim()) return;
+
+                //     const userMessage = {
+                //         id: Date.now(),
+                //         type: 'user',
+                //         content: this.input
+                //     };
+
+                //     this.messages.push(userMessage);
+                //     const userInput = this.input;
+                //     this.input = '';
+                //     this.isLoading = true;
+
+                //     // Scroll to bottom
+                //     this.$nextTick(() => {
+                //         this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
+                //     });
+
+                //     // Simulate AI response (replace with the model later)
+                //     setTimeout(() => {
+                //         const aiMessage = {
+                //             id: Date.now() + 1,
+                //             type: 'ai',
+                //             content: this.isOneLineMode 
+                //                 ? `Here's a quick explanation: ${userInput} is like a concept that helps computers think smarter!`
+                //                 : `Great question about ${userInput}! Let me explain this in simple terms.\n\nThink of it like this: Imagine you're teaching a child to recognize different fruits. You show them many examples of apples - red ones, green ones, big and small. Eventually, they learn what makes an apple an apple.\n\nThat's similar to how AI learns! It looks at lots of examples and finds patterns, just like how you learned to recognize things when you were young.\n\nThe main difference is that AI uses mathematics and computers to do this learning process much faster than humans, but the basic idea of "learning from examples" is the same!`,
+                //             showAlternative: true,
+                //             showOneLine: !this.isOneLineMode,
+                //             oneLine: null
+                //         };
+                        
+                //         this.messages.push(aiMessage);
+                //         this.isLoading = false;
+
+                //         this.$nextTick(() => {
+                //             this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
+                //         });
+                //     }, 1000);
+                // },
+
                 sendMessage() {
+                    // 1. Cek input kosong
                     if (!this.input.trim()) return;
 
+                    // 2. Tampilkan pesan User di layar
                     const userMessage = {
                         id: Date.now(),
                         type: 'user',
                         content: this.input
                     };
-
                     this.messages.push(userMessage);
-                    const userInput = this.input;
-                    this.input = '';
-                    this.isLoading = true;
 
-                    // Scroll to bottom
+                    // Simpan input ke variabel sementara
+                    const userInput = this.input;
+                    this.input = ''; // Kosongkan kotak ketik
+                    this.isLoading = true; // Munculkan "Thinking..."
+
+                    // Scroll ke bawah
                     this.$nextTick(() => {
                         this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
                     });
 
-                    // Simulate AI response (replace with the model later)
-                    setTimeout(() => {
-                        const aiMessage = {
-                            id: Date.now() + 1,
-                            type: 'ai',
-                            content: this.isOneLineMode 
-                                ? `Here's a quick explanation: ${userInput} is like a concept that helps computers think smarter!`
-                                : `Great question about ${userInput}! Let me explain this in simple terms.\n\nThink of it like this: Imagine you're teaching a child to recognize different fruits. You show them many examples of apples - red ones, green ones, big and small. Eventually, they learn what makes an apple an apple.\n\nThat's similar to how AI learns! It looks at lots of examples and finds patterns, just like how you learned to recognize things when you were young.\n\nThe main difference is that AI uses mathematics and computers to do this learning process much faster than humans, but the basic idea of "learning from examples" is the same!`,
-                            showAlternative: true,
-                            showOneLine: !this.isOneLineMode,
-                            oneLine: null
-                        };
-                        
-                        this.messages.push(aiMessage);
-                        this.isLoading = false;
-
+                    // 3. KIRIM KE SERVER (Fetch API)
+                    fetch('/chat/send', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            message: userInput,
+                            // Kirim mode one-line jika perlu (opsional, tergantung controller)
+                            oneLineMode: this.isOneLineMode 
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // 4. TERIMA JAWABAN DARI PYTHON
+                        if (data.success) {
+                            const aiMessage = {
+                                id: Date.now() + 1,
+                                type: 'ai',
+                                content: data.response, // <--- INI JAWABAN ASLI DARI API.PY
+                                showAlternative: false, // Fitur ini sementara dimatikan dulu karena butuh logika tambahan
+                                showOneLine: false,
+                                oneLine: null
+                            };
+                            this.messages.push(aiMessage);
+                        } else {
+                            // Jika Error
+                            alert('Error: ' + data.response);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Gagal menghubungi server. Pastikan terminal "php artisan serve" dan "python api.py" menyala.');
+                    })
+                    .finally(() => {
+                        this.isLoading = false; // Hilangkan "Thinking..."
                         this.$nextTick(() => {
                             this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
                         });
-                    }, 1000);
+                    });
                 },
 
                 sendSuggestedTerm(term) {
