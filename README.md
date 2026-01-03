@@ -97,6 +97,7 @@ Visit: `http://127.0.0.1:8000`
 
 ### Flask (Python) API server
 
+Insert the [AISAP model](https://drive.google.com/drive/folders/13xj4k_hw-c35O8OFoj1CwAynLYU-R-SX) into the folder.
 Open a **new terminal** or **tab** in Codespaces:
 
 ```bash

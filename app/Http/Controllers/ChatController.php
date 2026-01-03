@@ -21,16 +21,18 @@ class ChatController extends Controller
             // This acts as the "bridge" connection
             $response = Http::post('http://127.0.0.1:5000/predict', [
                 'message' => $userMessage,
+                'oneLineMode' => $request->input('oneLineMode', false)
             ]);
 
             // 3. Check Response
             if ($response->successful()) {
                 // Get the answer from Python JSON {'reply': '...'}
-                $botReply = $response->json()['reply'] ?? 'Error: AI did not provide a reply.';
+                $data = $response->json();
 
                 return response()->json([
                     'success' => true,
-                    'response' => $botReply
+                    'full_reply' => $data['full_reply'] ?? null,
+                    'one_line_reply' => $data['one_line_reply'] ?? null
                 ]);
             } else {
                 return response()->json([

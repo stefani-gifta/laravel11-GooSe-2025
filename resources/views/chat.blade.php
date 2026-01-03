@@ -20,7 +20,7 @@
         <!-- Header -->
         <div class="border-b border-gray-200 px-6 py-4">
             <div class="flex items-center gap-2">
-                <h1 class="text-xl font-semibold text-gray-900">AISAP</h1>
+                <h1 @click="window.location.reload()" class="text-xl font-semibold text-gray-900 cursor-pointer">AISAP</h1>
                 <span class="text-sm text-gray-500 ml-2">AI as Simple as Possible</span>
             </div>
         </div>
@@ -68,20 +68,11 @@
                                     @mouseup="handleTextSelection(message.id, $event)"
                                     x-html="renderMessageContent(message)"
                                 ></div>
-                                
-                                <!-- One-line Summary -->
-                                <template x-if="message.oneLine">
-                                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-3 rounded">
-                                        <p class="text-sm text-gray-700">
-                                            <strong>One-line summary:</strong> <span x-text="message.oneLine"></span>
-                                        </p>
-                                    </div>
-                                </template>
-                                
+
                                 <!-- Action Buttons -->
                                 <div class="flex gap-2 flex-wrap">
                                     <!-- Alternative Explanation -->
-                                    <template x-if="message.showAlternative">
+                                    <!-- <template x-if="message.showAlternative">
                                         <button
                                             @click="getAlternativeExplanation(message.id)"
                                             class="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -91,16 +82,19 @@
                                             </svg>
                                             Different explanation?
                                         </button>
-                                    </template>
+                                    </template> -->
                                     
                                     <!-- One-line Summary Button -->
-                                    <template x-if="message.showOneLine">
-                                        <button
-                                            @click="generateOneLine(message.id)"
-                                            class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                                        >
-                                            One-line summary
-                                        </button>
+                                    <!-- Only render if summary exists -->
+                                    <template x-if="message.oneLine">
+                                        <div class="mb-3">
+                                            <!-- One-line summary (toggle visibility) -->
+                                            <div x-show="message.showOneLine" class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded mt-2" x-transition>
+                                                <p class="text-sm text-gray-700">
+                                                    <strong>Summary:</strong> <span x-text="message.oneLine"></span>
+                                                </p>
+                                            </div>
+                                        </div>
                                     </template>
                                     
                                     <!-- Copy Button -->
@@ -108,10 +102,14 @@
                                         @click="copyToClipboard(message.content)"
                                         class="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                                     >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                                        </svg>
-                                        Copy
+                                        <div class="inline-flex items-center cursor-pointer text-gray-600 hover:text-gray-900 gap-1 rounded transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                                </path>
+                                            </svg>
+                                            <span>Copy</span>
+                                        </div>
                                     </button>
                                 </div>
                             </div>
@@ -149,11 +147,11 @@
                             x-model="isOneLineMode"
                             class="w-4 h-4 rounded border-gray-300"
                         />
-                        One-line only
+                        Summarize
                     </label>
                 </div>
                 
-                <div class="flex gap-3 items-end">
+                <div class="flex gap-3 items-start">
                     <div class="flex-1 relative">
                         <textarea
                             x-model="input"
@@ -168,7 +166,7 @@
                     <button
                         @click="sendMessage()"
                         :disabled="!input.trim()"
-                        class="p-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                        class="p-4 bg-gray-900 text-white rounded-xl hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
@@ -222,23 +220,22 @@
                         },
                         body: JSON.stringify({
                             message: userInput,
-                            oneLineMode: this.isOneLineMode 
+                            oneLineMode: this.isOneLineMode // <-- send true/false
                         })
                     })
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success) {
+                        if (data.full_reply) {
                             const aiMessage = {
                                 id: Date.now() + 1,
                                 type: 'ai',
-                                content: data.response,
-                                showAlternative: false,
-                                showOneLine: false,
-                                oneLine: null
+                                content: data.full_reply,
+                                showOneLine: this.isOneLineMode,
+                                oneLine: data.one_line_reply || null
                             };
                             this.messages.push(aiMessage);
                         } else {
-                            alert('Error: ' + data.response);
+                            alert('Error: AI did not return a valid response.');
                         }
                     })
                     .catch(error => {
@@ -256,32 +253,6 @@
                 sendSuggestedTerm(term) {
                     this.input = term;
                     this.sendMessage();
-                },
-
-                getAlternativeExplanation(messageId) {
-                    this.messages = this.messages.map(msg => {
-                        if (msg.id === messageId && msg.type === 'ai') {
-                            return {
-                                ...msg,
-                                content: `Here's another way to think about it!\n\nImagine this as a recipe book. When you follow recipes multiple times, you start understanding patterns and can even create your own dishes.\n\nAI works similarly - it follows patterns from data it has seen before and can make predictions or decisions about new situations.\n\nPractice and experience matter, just like cooking!`,
-                                showAlternative: true
-                            };
-                        }
-                        return msg;
-                    });
-                },
-
-                generateOneLine(messageId) {
-                    this.messages = this.messages.map(msg => {
-                        if (msg.id === messageId && msg.type === 'ai') {
-                            return {
-                                ...msg,
-                                oneLine: `In simple terms: It's a way for computers to learn from examples, just like humans do!`,
-                                showOneLine: false
-                            };
-                        }
-                        return msg;
-                    });
                 },
 
                 copyToClipboard(content) {
