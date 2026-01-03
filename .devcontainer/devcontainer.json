@@ -1,0 +1,10 @@
+{
+  "name": "Laravel 11",
+  "image": "mcr.microsoft.com/devcontainers/php:8.2",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    }
+  },
+  "postCreateCommand": "composer install"
+}
