@@ -13,15 +13,43 @@
             background-color: #fef08a;
             padding: 2px 0;
         }
+        h1 {
+            transition: 0.2s;
+        }
+        h1:hover {
+            text-shadow: 0 0 5px darkgrey;
+            transition: 0.2s;
+        }
     </style>
 </head>
 <body>
     <div x-data="chatApp()" x-cloak class="flex flex-col h-screen bg-white">
         <!-- Header -->
-        <div class="border-b border-gray-200 px-6 py-4">
+        <div class="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-2">
                 <h1 @click="window.location.reload()" class="text-xl font-semibold text-gray-900 cursor-pointer">AISAP</h1>
                 <span class="text-sm text-gray-500 ml-2">AI as Simple as Possible</span>
+            </div>
+            <div class="flex items-center gap-2">
+                @auth
+                    <span class="text-sm text-gray-700">Welcome, {{ Auth::user()->name }}</span>
+                    <form method="POST" action="{{ route('logout') }}" class="inline">
+                        @csrf
+                        <button type="submit" class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                            Sign Out
+                        </button>
+                    </form>
+                @else
+                    <!-- Sign In -->
+                    <a href="{{ route('login') }}" class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        Sign In
+                    </a>
+
+                    <!-- Sign Up -->
+                    <a href="{{ route('register') }}" class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        Sign Up
+                    </a>
+                @endauth
             </div>
         </div>
 
@@ -71,21 +99,7 @@
 
                                 <!-- Action Buttons -->
                                 <div class="flex gap-2 flex-wrap">
-                                    <!-- Alternative Explanation -->
-                                    <!-- <template x-if="message.showAlternative">
-                                        <button
-                                            @click="getAlternativeExplanation(message.id)"
-                                            class="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                                        >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                            </svg>
-                                            Different explanation?
-                                        </button>
-                                    </template> -->
-                                    
                                     <!-- One-line Summary Button -->
-                                    <!-- Only render if summary exists -->
                                     <template x-if="message.oneLine">
                                         <div class="mb-3">
                                             <!-- One-line summary (toggle visibility) -->
@@ -140,39 +154,48 @@
         <!-- Input Area -->
         <div class="border-t border-gray-200 px-6 py-4 bg-white">
             <div class="max-w-3xl mx-auto">
-                <div class="flex items-center gap-3 mb-2">
-                    <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            x-model="isOneLineMode"
-                            class="w-4 h-4 rounded border-gray-300"
-                        />
-                        Summarize
-                    </label>
-                </div>
-                
-                <div class="flex gap-3 items-start">
-                    <div class="flex-1 relative">
-                        <textarea
-                            x-model="input"
-                            @keydown.enter.prevent="if (!$event.shiftKey) sendMessage()"
-                            placeholder="Ask me about any AI concept..."
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl resize-none focus:outline-none focus:border-gray-400 text-gray-900"
-                            rows="1"
-                            style="min-height: 52px; max-height: 200px;"
-                        ></textarea>
+                @auth
+                    <div class="flex items-center gap-3 mb-2">
+                        <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                x-model="isOneLineMode"
+                                class="w-4 h-4 rounded border-gray-300"
+                            />
+                            Summarize
+                        </label>
                     </div>
                     
-                    <button
-                        @click="sendMessage()"
-                        :disabled="!input.trim()"
-                        class="p-4 bg-gray-900 text-white rounded-xl hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                        </svg>
-                    </button>
-                </div>
+                    <div class="flex gap-3 items-start">
+                        <div class="flex-1 relative">
+                            <textarea
+                                x-model="input"
+                                @keydown.enter.prevent="if (!$event.shiftKey) sendMessage()"
+                                placeholder="Ask me about any AI concept..."
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl resize-none focus:outline-none focus:border-gray-400 text-gray-900"
+                                rows="1"
+                                style="min-height: 52px; max-height: 200px;"
+                            ></textarea>
+                        </div>
+                        
+                        <button
+                            @click="sendMessage()"
+                            :disabled="!input.trim()"
+                            class="p-4 bg-gray-900 text-white rounded-xl hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                        </button>
+                    </div>
+                @else
+                    <div class="text-center py-4">
+                        <p class="text-gray-600 mb-4">Please sign in to start chatting</p>
+                        <a href="{{ route('login') }}" class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
+                            Sign In
+                        </a>
+                    </div>
+                @endauth
             </div>
         </div>
     </div>
@@ -220,7 +243,7 @@
                         },
                         body: JSON.stringify({
                             message: userInput,
-                            oneLineMode: this.isOneLineMode // <-- send true/false
+                            oneLineMode: this.isOneLineMode
                         })
                     })
                     .then(response => response.json())

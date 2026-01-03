@@ -1,11 +1,25 @@
 <?php
 
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ChatController; // <--- TAMBAHKAN BARIS INI (Wajib!)
 
 Route::get('/', function () {
-    return view('chat'); // Pastikan file resources/views/chat.blade.php ada
+    return view('chat');
+})->name('home');
+
+Route::post('/chat/send', [ChatController::class, 'sendMessage'])
+    ->middleware('auth')
+    ->name('chat.send');
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+    
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
 });
 
-// Route ini sudah benar
-Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');
