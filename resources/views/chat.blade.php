@@ -20,12 +20,8 @@
         <!-- Header -->
         <div class="border-b border-gray-200 px-6 py-4">
             <div class="flex items-center gap-2">
-                <!-- add icon here 
-                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-                </svg> -->
                 <h1 class="text-xl font-semibold text-gray-900">AISAP</h1>
-                <span class="text-sm text-gray-500 ml-2">AI as Soon as Possible</span>
+                <span class="text-sm text-gray-500 ml-2">AI as Simple as Possible</span>
             </div>
         </div>
 
@@ -38,7 +34,7 @@
                         Learn AI in Simple Terms
                     </h2>
                     <p class="text-gray-600 mb-8">
-                        Ask me anything about AI, and I'll explain it using everyday analogies
+                        Ask me anything about AI, and I'll explain it using everyday analogies.
                     </p>
                     
                     <!-- Suggested Terms -->
@@ -84,7 +80,7 @@
                                 
                                 <!-- Action Buttons -->
                                 <div class="flex gap-2 flex-wrap">
-                                    <!-- Different Explanation Button -->
+                                    <!-- Alternative Explanation -->
                                     <template x-if="message.showAlternative">
                                         <button
                                             @click="getAlternativeExplanation(message.id)"
@@ -183,6 +179,7 @@
         </div>
     </div>
 
+    <!-- Alpine.js Chat Logic -->
     <script>
         function chatApp() {
             return {
@@ -199,56 +196,9 @@
                     'Natural Language Processing'
                 ],
 
-                init() {
-                    // Any initialization code
-                },
-
-                // sendMessage() {
-                //     if (!this.input.trim()) return;
-
-                //     const userMessage = {
-                //         id: Date.now(),
-                //         type: 'user',
-                //         content: this.input
-                //     };
-
-                //     this.messages.push(userMessage);
-                //     const userInput = this.input;
-                //     this.input = '';
-                //     this.isLoading = true;
-
-                //     // Scroll to bottom
-                //     this.$nextTick(() => {
-                //         this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
-                //     });
-
-                //     // Simulate AI response (replace with the model later)
-                //     setTimeout(() => {
-                //         const aiMessage = {
-                //             id: Date.now() + 1,
-                //             type: 'ai',
-                //             content: this.isOneLineMode 
-                //                 ? `Here's a quick explanation: ${userInput} is like a concept that helps computers think smarter!`
-                //                 : `Great question about ${userInput}! Let me explain this in simple terms.\n\nThink of it like this: Imagine you're teaching a child to recognize different fruits. You show them many examples of apples - red ones, green ones, big and small. Eventually, they learn what makes an apple an apple.\n\nThat's similar to how AI learns! It looks at lots of examples and finds patterns, just like how you learned to recognize things when you were young.\n\nThe main difference is that AI uses mathematics and computers to do this learning process much faster than humans, but the basic idea of "learning from examples" is the same!`,
-                //             showAlternative: true,
-                //             showOneLine: !this.isOneLineMode,
-                //             oneLine: null
-                //         };
-                        
-                //         this.messages.push(aiMessage);
-                //         this.isLoading = false;
-
-                //         this.$nextTick(() => {
-                //             this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
-                //         });
-                //     }, 1000);
-                // },
-
                 sendMessage() {
-                    // 1. Cek input kosong
                     if (!this.input.trim()) return;
 
-                    // 2. Tampilkan pesan User di layar
                     const userMessage = {
                         id: Date.now(),
                         type: 'user',
@@ -256,17 +206,14 @@
                     };
                     this.messages.push(userMessage);
 
-                    // Simpan input ke variabel sementara
                     const userInput = this.input;
-                    this.input = ''; // Kosongkan kotak ketik
-                    this.isLoading = true; // Munculkan "Thinking..."
+                    this.input = '';
+                    this.isLoading = true;
 
-                    // Scroll ke bawah
                     this.$nextTick(() => {
                         this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
                     });
 
-                    // 3. KIRIM KE SERVER (Fetch API)
                     fetch('/chat/send', {
                         method: 'POST',
                         headers: {
@@ -275,34 +222,31 @@
                         },
                         body: JSON.stringify({
                             message: userInput,
-                            // Kirim mode one-line jika perlu (opsional, tergantung controller)
                             oneLineMode: this.isOneLineMode 
                         })
                     })
                     .then(response => response.json())
                     .then(data => {
-                        // 4. TERIMA JAWABAN DARI PYTHON
                         if (data.success) {
                             const aiMessage = {
                                 id: Date.now() + 1,
                                 type: 'ai',
-                                content: data.response, // <--- INI JAWABAN ASLI DARI API.PY
-                                showAlternative: false, // Fitur ini sementara dimatikan dulu karena butuh logika tambahan
+                                content: data.response,
+                                showAlternative: false,
                                 showOneLine: false,
                                 oneLine: null
                             };
                             this.messages.push(aiMessage);
                         } else {
-                            // Jika Error
                             alert('Error: ' + data.response);
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Gagal menghubungi server. Pastikan terminal "php artisan serve" dan "python api.py" menyala.');
+                        alert('Failed to contact server. Make sure "php artisan serve" and "python api.py" are running.');
                     })
                     .finally(() => {
-                        this.isLoading = false; // Hilangkan "Thinking..."
+                        this.isLoading = false;
                         this.$nextTick(() => {
                             this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
                         });
@@ -319,7 +263,7 @@
                         if (msg.id === messageId && msg.type === 'ai') {
                             return {
                                 ...msg,
-                                content: `Here's another way to think about it!\n\nImagine this as a recipe book. When you follow recipes multiple times, you start understanding cooking patterns and can even create your own dishes.\n\nAI works similarly - it follows patterns from data it has seen before and can then make predictions or decisions about new situations it encounters.\n\nThe key is practice and experience, just like becoming a better cook over time!`,
+                                content: `Here's another way to think about it!\n\nImagine this as a recipe book. When you follow recipes multiple times, you start understanding patterns and can even create your own dishes.\n\nAI works similarly - it follows patterns from data it has seen before and can make predictions or decisions about new situations.\n\nPractice and experience matter, just like cooking!`,
                                 showAlternative: true
                             };
                         }
@@ -383,8 +327,6 @@
 
                 renderMessageContent(message) {
                     let content = message.content;
-                    
-                    // Apply highlights
                     Object.entries(this.highlights).forEach(([id, highlight]) => {
                         if (highlight.messageId === message.id) {
                             content = content.replace(
@@ -393,7 +335,6 @@
                             );
                         }
                     });
-
                     return content.replace(/\n/g, '<br/>');
                 }
             }
