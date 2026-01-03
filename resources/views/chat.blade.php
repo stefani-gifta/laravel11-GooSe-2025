@@ -263,7 +263,7 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Failed to contact server. Make sure "php artisan serve" and "python api.py" are running.');
+                        alert('Failed to contact server. Make sure you are logged in.');
                     })
                     .finally(() => {
                         this.isLoading = false;

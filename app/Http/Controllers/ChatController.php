@@ -45,7 +45,7 @@ class ChatController extends Controller
             // If the Python server is down
             return response()->json([
                 'success' => false,
-                'response' => 'AI server is not running. Make sure to run "python api.py"!'
+                'response' => 'AISAP server is not running!'
             ], 500);
         }
     }
