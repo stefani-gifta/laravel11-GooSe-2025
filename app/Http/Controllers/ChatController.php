@@ -19,7 +19,7 @@ class ChatController extends Controller
         try {
             // 2. SEND MESSAGE TO PYTHON SERVER (Port 5000)
             // This acts as the "bridge" connection
-            $response = Http::post('http://127.0.0.1:5000/predict', [
+            $response = Http::post('https://stefani-gifta-aisap.hf.space/predict', [
                 'message' => $userMessage,
                 'oneLineMode' => $request->input('oneLineMode', false)
             ]);
