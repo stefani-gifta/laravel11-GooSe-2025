@@ -1,4 +1,4 @@
-# Laravel + Flask Project
+# GooSe: Chatbot Web App to Simplify AI Terms
 
 This project runs **Laravel (PHP)** and **Flask (Python)** simultaneously in a **GitHub Codespace**.  
 Follow the steps below to set up the environment and run both servers.
